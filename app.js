@@ -45,6 +45,7 @@ function randomName() {
 }
 
 app.get("/file", async function (req, res, next) {
+  console.log("Hello World");
   const form = new FormData();
   const chatId = req.query.chatId;
   const videoId = req.query.videoId.split("youtu.be/")[1];
