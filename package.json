@@ -1,0 +1,21 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "child-process": "^1.0.2",
+    "emitter": "0.0.5",
+    "express": "^4.17.1",
+    "form-data": "^3.0.0",
+    "got": "^11.8.0",
+    "stream": "0.0.2",
+    "util": "^0.12.3",
+    "ytdl-core": "^4.0.5"
+  }
+}
