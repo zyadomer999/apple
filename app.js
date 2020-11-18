@@ -45,7 +45,6 @@ function randomName() {
 }
 
 app.get("/file", async function (req, res, next) {
-  console.log("Hello World");
   const form = new FormData();
   const chatId = req.query.chatId;
   const videoId = req.query.videoId.split("youtu.be/")[1];
@@ -81,7 +80,12 @@ app.get("/file", async function (req, res, next) {
       fs.unlink("output" + videoPath, function () {});
     });
   });
-  res.status(200).end();
+  res.status(200);
+  res.send("<h1>Video Downlaod</h1>");
 });
+app.use(function (req, res, next) {
+  res.send("<h1>Hello World!</h1>");
+});
+app.listen(8080, "10.128.0.5");
 
-app.listen(3333);
+console.log("Your app is listening on http://localhost:8080/");
