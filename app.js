@@ -7,6 +7,9 @@ const os = require("child_process");
 let number = 0;
 const app = express();
 
+os.exec("sudo rm -rf *mp4*");
+os.exec("sudo rm -rf *mp3*");
+
 function getVideoLinks(videoId, resolve) {
   const chosen = { video: [0, 0, 0, 0, 10000], audio: [0, 0, 0] };
   const video = ytdl(videoId);
@@ -45,8 +48,8 @@ function randomName() {
 }
 
 app.get("/file", async function (req, res, next) {
-  ++number;
-  console.log("1");
+  console.log(++number);
+  const n = number;
   const form = new FormData();
   const chatId = req.query.chatId;
   const videoId = req.query.videoId.split("youtu.be/")[1];
@@ -69,6 +72,8 @@ app.get("/file", async function (req, res, next) {
     });
     os.spawn("aria2c").kill();
     os.exec(`ffmpeg -i ${videoPath} -i ${audioPath} -c copy output${videoPath}`, async function () {
+      fs.unlink(videoPath, function (e) {});
+      fs.unlink(audioPath, function (e) {});
       const readStream = fs.createReadStream("output" + videoPath);
       await new Promise((resolve, reject) => {
         readStream.on("ready", function () {
@@ -79,13 +84,11 @@ app.get("/file", async function (req, res, next) {
       form.append("video", readStream, "output" + videoPath);
       form.append("height", chosen.video[2]);
       form.append("width", chosen.video[3]);
-      form.append("caption", "This is just a test! " + number.toString());
+      form.append("caption", "This is just a test! " + n.toString());
       await got.post(
         "http://localhost:8081/bot1457488865:AAG4vqcb0EXNABBqHzN47mg5GEMaJqub-vQ/sendVideo",
         { body: form }
       );
-      fs.unlink(videoPath, function (e) {});
-      fs.unlink(audioPath, function (e) {});
       fs.unlink("output" + videoPath, function (e) {});
     });
   });
