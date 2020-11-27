@@ -4,11 +4,13 @@ const FormData = require("form-data");
 const fs = require("fs");
 const got = require("got");
 const os = require("child_process");
-let number = 0;
+let number = -1;
 const app = express();
+const EventEmitter = require("events");
+class MyEmitter extends EventEmitter {}
 
-os.exec("sudo rm -rf *mp4*");
-os.exec("sudo rm -rf *mp3*");
+os.exec("rm -rf *mp4*");
+os.exec("rm -rf *mp3*");
 
 function getVideoLinks(videoId, resolve) {
   const chosen = { video: [0, 0, 0, 0, 10000], audio: [0, 0, 0] };
@@ -46,10 +48,44 @@ function randomName() {
   }
   return name;
 }
+const videos = [
+  "uh4dTLJ9q9o",
+  "5oGyBXv6_eg",
+  "j6PbonHsqW0",
+  "3XA0bB79oGc",
+  "JutrLer3k-A",
+  "_nbVTUYVKxg",
+  "ARHVR9BkOWU",
+  "PfyJQEIsMt0",
+  "BTSH3hxdk_A",
+  "jfqj7Qs-9Is",
+  "O1C9zOQpKG4",
+  "A4-G7YpSFb4",
+  "vbuq7w3ZDUQ",
+  "DoLAoOkG5gY",
+  "xMnx_3BC7EM",
+  "07d2dXHYb94",
+  "U9Uh_H5mCbQ",
+  "uhQu4HqT7y8",
+  "JOWiPx5VRUU",
+  "bUuh2Ku9PpQ",
+  "5L4DQfVIcdg",
+  "mZ6eeAjgSZI",
+  "MNBtdNgH0Ds",
+  "kQ8RXYFn7Ls",
+  "cSGZyRBpMBE",
+  "4VqmRzH2xQY",
+  "D0a0aNqTehM",
+  "D_Rx4qZ8QRc",
+  "KA6azZALMiE",
+  "bi6WdqHDoco",
+  "38y_1EWIE9I",
+];
+const events = [];
+let requests = -1;
 
 app.get("/file", async function (req, res, next) {
-  console.log(++number);
-  const n = number;
+  const n = ++number;
   const form = new FormData();
   const chatId = req.query.chatId;
   const videoId = req.query.videoId.split("youtu.be/")[1];
@@ -57,45 +93,62 @@ app.get("/file", async function (req, res, next) {
   new Promise((resolve, reject) => {
     getVideoLinks(videoId, resolve);
   }).then(async (chosen) => {
-    const videoPath = name + ".mp4";
-    const audioPath = name + ".mp3";
-    await new Promise((resolve, reject) => {
-      p = os.exec(`aria2c -x 16 -s 16 -o "${videoPath}" "${chosen.video[0]}"`, function (e) {
-        resolve();
-      });
-    });
-    os.spawn("aria2c").kill();
-    await new Promise((resolve, reject) => {
-      os.exec(`aria2c -x 16 -s 16 -o "${audioPath}" "${chosen.audio[0]}"`, function (e) {
-        resolve();
-      });
-    });
-    os.spawn("aria2c").kill();
-    os.exec(`ffmpeg -i ${videoPath} -i ${audioPath} -c copy output${videoPath}`, async function () {
-      fs.unlink(videoPath, function (e) {});
-      fs.unlink(audioPath, function (e) {});
-      const readStream = fs.createReadStream("output" + videoPath);
+    events[events.push(new MyEmitter()) - 1].on("ready", async function () {
+      events.shift();
+      const videoPath = name + ".mp4";
+      const audioPath = name + ".mp3";
       await new Promise((resolve, reject) => {
-        readStream.on("ready", function () {
+        os.exec(`aria2c -x 16 -s 16 -o "${videoPath}" "${chosen.video[0]}"`, function (e) {
           resolve();
         });
       });
-      form.append("chat_id", chatId);
-      form.append("video", readStream, "output" + videoPath);
-      form.append("height", chosen.video[2]);
-      form.append("width", chosen.video[3]);
-      form.append("caption", "This is just a test! " + n.toString());
-      await got.post(
-        "http://localhost:8081/bot1457488865:AAG4vqcb0EXNABBqHzN47mg5GEMaJqub-vQ/sendVideo",
-        { body: form }
+      os.spawn("aria2c").kill();
+      await new Promise((resolve, reject) => {
+        os.exec(`aria2c -x 16 -s 16 -o "${audioPath}" "${chosen.audio[0]}"`, function (e) {
+          resolve();
+        });
+      });
+      os.spawn("aria2c").kill();
+      os.exec(
+        `ffmpeg -i ${videoPath} -i ${audioPath} -c copy output${videoPath}`,
+        async function () {
+          fs.unlink(videoPath, function (e) {});
+          fs.unlink(audioPath, function (e) {});
+          const readStream = fs.createReadStream("output" + videoPath);
+          await new Promise((resolve, reject) => {
+            readStream.on("ready", function () {
+              resolve();
+            });
+          });
+          form.append("chat_id", chatId);
+          form.append("video", readStream, "output" + videoPath);
+          form.append("height", chosen.video[2]);
+          form.append("width", chosen.video[3]);
+          form.append("caption", "This is just a test! " + n.toString());
+          await got.post(
+            "http://localhost:8081/bot1457488865:AAG4vqcb0EXNABBqHzN47mg5GEMaJqub-vQ/sendVideo",
+            { body: form }
+          );
+          fs.unlink("output" + videoPath, function (e) {});
+          --requests;
+          try {
+            events[0].emit("ready");
+          } catch {
+            return;
+          }
+        }
       );
-      fs.unlink("output" + videoPath, function (e) {});
     });
+    ++requests;
+    if (requests < 10) {
+      events[0].emit("ready");
+    }
   });
-  res.status(200);
-  res.send("<h1>Video Downlaod</h1>");
+  res.send("<h1>Video Downlaod!</h1>");
 });
+
 app.use(function (req, res, next) {
   res.send("<h1>Hello World!</h1>");
 });
+
 app.listen(3000);
