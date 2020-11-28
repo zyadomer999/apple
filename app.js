@@ -4,6 +4,7 @@ const FormData = require("form-data");
 const fs = require("fs");
 const got = require("got");
 const os = require("child_process");
+let serverNumber = 0;
 let number = -1;
 const app = express();
 const EventEmitter = require("events");
@@ -92,8 +93,12 @@ app.get("/file", async function (req, res, next) {
           form.append("height", chosen.video[2]);
           form.append("width", chosen.video[3]);
           form.append("caption", "This is just a test! " + n.toString());
+          if (serverNumber == 20) {
+            serverNumber = 0;
+          }
+          ++serverNumber;
           await got.post(
-            "http://localhost:8081/bot1457488865:AAG4vqcb0EXNABBqHzN47mg5GEMaJqub-vQ/sendVideo",
+            `http://localhost:800${serverNumber}/bot1457488865:AAG4vqcb0EXNABBqHzN47mg5GEMaJqub-vQ/sendVideo`,
             { body: form }
           );
           fs.unlink("output" + videoPath, function (e) {});
