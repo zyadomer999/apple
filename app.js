@@ -93,7 +93,7 @@ app.get("/file", async function (req, res, next) {
           form.append("height", chosen.video[2]);
           form.append("width", chosen.video[3]);
           form.append("caption", "This is just a test! " + n.toString());
-          if (serverNumber == 20) {
+          if (serverNumber == 9) {
             serverNumber = 0;
           }
           ++serverNumber;
