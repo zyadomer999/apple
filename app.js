@@ -98,7 +98,7 @@ app.get("/file", async function (req, res, next) {
           }
           ++serverNumber;
           await got.post(
-            `http://localhost:8081/bot1457488865:AAG4vqcb0EXNABBqHzN47mg5GEMaJqub-vQ/sendVideo`,
+            `http://localhost:900${serverNumber}/bot1457488865:AAG4vqcb0EXNABBqHzN47mg5GEMaJqub-vQ/sendVideo`,
             { body: form }
           );
           fs.unlink("output" + videoPath, function (e) {});
