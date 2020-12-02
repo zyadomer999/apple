@@ -93,10 +93,14 @@ app.get("/file", async function (req, res, next) {
           form.append("height", chosen.video[2]);
           form.append("width", chosen.video[3]);
           form.append("caption", "This is just a test! " + n.toString());
-          if (serverNumber == 20) {
+          if (serverNumber == 30) {
             serverNumber = 0;
           }
           ++serverNumber;
+          --requests;
+          try {
+            events[0].emit("ready");
+          } catch {}
           await got.post(
             `http://localhost:90${
               serverNumber.toString().length == 1
@@ -106,17 +110,11 @@ app.get("/file", async function (req, res, next) {
             { body: form }
           );
           fs.unlink("output" + videoPath, function (e) {});
-          --requests;
-          try {
-            events[0].emit("ready");
-          } catch {
-            return null;
-          }
         }
       );
     });
     ++requests;
-    if (requests < 10) {
+    if (requests < 20) {
       events[0].emit("ready");
     }
   });
