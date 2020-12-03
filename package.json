@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.21.0",
     "child_process": "^1.0.2",
     "emitter": "0.0.5",
     "events": "^3.2.0",

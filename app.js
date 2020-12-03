@@ -53,16 +53,16 @@ const events = [];
 let requests = -1;
 
 app.get("/file", async function (req, res, next) {
-  const n = ++number;
-  const form = new FormData();
   const chatId = req.query.chatId;
   const videoId = req.query.videoId.split("youtu.be/")[1];
-  const name = randomName();
-  new Promise((resolve, reject) => {
-    getVideoLinks(videoId, resolve);
-  }).then(async (chosen) => {
-    events[events.push(new MyEmitter()) - 1].on("ready", async function () {
+  events[events.push(new MyEmitter()) - 1].on("ready", async function () {
+    new Promise((resolve, reject) => {
+      getVideoLinks(videoId, resolve);
+    }).then(async (chosen) => {
       events.shift();
+      const n = ++number;
+      const form = new FormData();
+      const name = randomName();
       const videoPath = name + ".mp4";
       const audioPath = name + ".mp3";
       await new Promise((resolve, reject) => {
@@ -80,8 +80,7 @@ app.get("/file", async function (req, res, next) {
       os.exec(
         `ffmpeg -i ${videoPath} -i ${audioPath} -c copy output${videoPath}`,
         async function () {
-          fs.unlink(videoPath, function (e) {});
-          fs.unlink(audioPath, function (e) {});
+          os.exec(`rm -rf ${name}*`);
           const readStream = fs.createReadStream("output" + videoPath);
           await new Promise((resolve, reject) => {
             readStream.on("ready", function () {
@@ -113,11 +112,11 @@ app.get("/file", async function (req, res, next) {
         }
       );
     });
-    ++requests;
-    if (requests < 20) {
-      events[0].emit("ready");
-    }
   });
+  ++requests;
+  if (requests < 20) {
+    events[0].emit("ready");
+  }
   res.send("<h1>Video Downlaod!</h1>");
 });
 
