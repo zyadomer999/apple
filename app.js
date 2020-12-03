@@ -80,7 +80,7 @@ app.get("/file", async function (req, res, next) {
       os.exec(
         `ffmpeg -i ${videoPath} -i ${audioPath} -c copy output${videoPath}`,
         async function () {
-          os.exec(`rm -rf ${name}*`);
+          os.exec(`rm -rf ${name}*`, function (e) {});
           const readStream = fs.createReadStream("output" + videoPath);
           await new Promise((resolve, reject) => {
             readStream.on("ready", function () {
