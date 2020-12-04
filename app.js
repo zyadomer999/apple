@@ -10,8 +10,8 @@ const app = express();
 const EventEmitter = require("events");
 class MyEmitter extends EventEmitter {}
 
-os.exec("rm -rf *mp4*");
-os.exec("rm -rf *mp3*");
+os.exec("sudo rm -rf *mp4*");
+os.exec("sudo rm -rf *mp3*");
 
 function getVideoLinks(videoId, resolve) {
   const chosen = { video: [0, 0, 0, 0, 10000], audio: [0, 0, 0] };
@@ -56,10 +56,10 @@ app.get("/file", async function (req, res, next) {
   const chatId = req.query.chatId;
   const videoId = req.query.videoId.split("youtu.be/")[1];
   events[events.push(new MyEmitter()) - 1].on("ready", async function () {
+    events.shift();
     new Promise((resolve, reject) => {
       getVideoLinks(videoId, resolve);
     }).then(async (chosen) => {
-      events.shift();
       const n = ++number;
       const form = new FormData();
       const name = randomName();
@@ -80,7 +80,7 @@ app.get("/file", async function (req, res, next) {
       os.exec(
         `ffmpeg -i ${videoPath} -i ${audioPath} -c copy output${videoPath}`,
         async function () {
-          os.exec(`rm -rf ${name}*`, function (e) {});
+          os.exec(`sudo rm -rf ${name}*`);
           const readStream = fs.createReadStream("output" + videoPath);
           await new Promise((resolve, reject) => {
             readStream.on("ready", function () {
@@ -96,10 +96,6 @@ app.get("/file", async function (req, res, next) {
             serverNumber = 0;
           }
           ++serverNumber;
-          --requests;
-          try {
-            events[0].emit("ready");
-          } catch {}
           await got.post(
             `http://localhost:90${
               serverNumber.toString().length == 1
@@ -108,7 +104,11 @@ app.get("/file", async function (req, res, next) {
             }/bot1457488865:AAG4vqcb0EXNABBqHzN47mg5GEMaJqub-vQ/sendVideo`,
             { body: form }
           );
-          fs.unlink("output" + videoPath, function (e) {});
+          --requests;
+          try {
+            events[0].emit("ready");
+          } catch {}
+          os.exec(`sudo rm -rf *${name}*`);
         }
       );
     });
