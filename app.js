@@ -83,7 +83,6 @@ app.get("/file", async function (req, res, next) {
       os.exec(
         `ffmpeg -i ${videoPath} -i ${audioPath} -c copy output${videoPath}`,
         async function () {
-          let readStream;
           os.exec(`sudo rm -rf ${name}*`);
           await getStream.buffer(fs.createReadStream("output" + videoPath)).then((b) => {
             form.append("chat_id", chatId);
