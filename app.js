@@ -4,10 +4,13 @@ const FormData = require("form-data");
 const fs = require("fs");
 const got = require("got");
 const os = require("child_process");
+const getStream = require("get-stream");
+
 let serverNumber = 0;
 let number = -1;
 const app = express();
 const EventEmitter = require("events");
+
 class MyEmitter extends EventEmitter {}
 
 os.exec("sudo rm -rf *mp4*");
@@ -80,19 +83,16 @@ app.get("/file", async function (req, res, next) {
       os.exec(
         `ffmpeg -i ${videoPath} -i ${audioPath} -c copy output${videoPath}`,
         async function () {
+          let readStream;
           os.exec(`sudo rm -rf ${name}*`);
-          const readStream = fs.createReadStream("output" + videoPath);
-          await new Promise((resolve, reject) => {
-            readStream.on("ready", function () {
-              resolve();
-            });
+          await getStream.buffer(fs.createReadStream("output" + videoPath)).then((b) => {
+            form.append("chat_id", chatId);
+            form.append("video", b, "output" + videoPath);
+            form.append("height", chosen.video[2]);
+            form.append("width", chosen.video[3]);
+            form.append("caption", "This is just a test! " + n.toString());
           });
-          form.append("chat_id", chatId);
-          form.append("video", readStream, "output" + videoPath);
-          form.append("height", chosen.video[2]);
-          form.append("width", chosen.video[3]);
-          form.append("caption", "This is just a test! " + n.toString());
-          if (serverNumber == 30) {
+          if (serverNumber == 20) {
             serverNumber = 0;
           }
           ++serverNumber;
