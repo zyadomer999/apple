@@ -91,7 +91,7 @@ app.get("/file", async function (req, res, next) {
             form.append("width", chosen.video[3]);
             form.append("caption", "This is just a test! " + n.toString());
           });
-          if (serverNumber == 10) {
+          if (serverNumber == 20) {
             serverNumber = 0;
           }
           ++serverNumber;
@@ -113,7 +113,7 @@ app.get("/file", async function (req, res, next) {
     });
   });
   ++requests;
-  if (requests < 10) {
+  if (requests < 20) {
     events[0].emit("ready");
   }
   res.send("<h1>Video Downlaod!</h1>");
