@@ -104,10 +104,10 @@ app.get("/file", async function (req, res, next) {
             { body: form }
           );
           --requests;
+          os.exec(`sudo rm -rf *${name}*`);
           try {
             events[0].emit("ready");
           } catch {}
-          os.exec(`sudo rm -rf *${name}*`);
         }
       );
     });
