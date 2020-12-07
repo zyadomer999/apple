@@ -83,28 +83,26 @@ app.get("/file", async function (req, res, next) {
       os.exec(
         `ffmpeg -i ${videoPath} -i ${audioPath} -c copy output${videoPath}`,
         async function () {
-          os.exec(`sudo rm -rf ${name}*`);
-          await getStream.buffer(fs.createReadStream("output" + videoPath)).then((b) => {
-            form.append("chat_id", chatId);
-            form.append("video", b, "output" + videoPath);
-            form.append("height", chosen.video[2]);
-            form.append("width", chosen.video[3]);
-            form.append("caption", "This is just a test! " + n.toString());
-          });
-          if (serverNumber == 20) {
+          os.exec(`rm -rf ${name}*`);
+          if (serverNumber == 40) {
             serverNumber = 0;
           }
           ++serverNumber;
-          await got.post(
-            `http://localhost:90${
-              serverNumber.toString().length == 1
-                ? "0" + serverNumber.toString()
-                : serverNumber.toString()
-            }/bot1457488865:AAG4vqcb0EXNABBqHzN47mg5GEMaJqub-vQ/sendVideo`,
-            { body: form }
-          );
+          let r = `curl --location --request POST 'http://localhost:90${
+            serverNumber.toString().length == 1
+              ? "0" + serverNumber.toString()
+              : serverNumber.toString()
+          }/bot1457488865:AAG4vqcb0EXNABBqHzN47mg5GEMaJqub-vQ/sendVideo' --form 'video=@"./output${videoPath}"' --form 'chat_id="${chatId}"' --form 'height="${
+            chosen.video[2]
+          }"' --form 'width="${
+            chosen.video[3]
+          }"' --form 'caption="This is just a test (${n.toString()})!"' && rm -rf *${name}*`;
+          await new Promise((resolve, reject) => {
+            os.exec(r, function (e) {
+              resolve();
+            });
+          });
           --requests;
-          os.exec(`sudo rm -rf *${name}*`);
           try {
             events[0].emit("ready");
           } catch {}
