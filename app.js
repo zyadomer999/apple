@@ -100,7 +100,7 @@ app.get("/file", async function (req, res, next) {
               serverNumber.toString().length == 1
                 ? "0" + serverNumber.toString()
                 : serverNumber.toString()
-            }/bo1463963715:AAH56rtLslDPSdF5WntyKOUSYi32V65gkzc/sendVideo`,
+            }/bot1457488865:AAG4vqcb0EXNABBqHzN47mg5GEMaJqub-vQ/sendVideo`,
             { body: form }
           );
           --requests;
@@ -118,8 +118,7 @@ app.get("/file", async function (req, res, next) {
   }
   res.send("<h1>Video Downlaod!</h1>");
 });
-
-app.use(function (req, res, next) {
+https: app.use(function (req, res, next) {
   res.send("<h1>Hello World!</h1>");
 });
 
