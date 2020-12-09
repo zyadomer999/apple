@@ -96,7 +96,8 @@ app.get("/file", async function (req, res, next) {
               ? "0" + serverNumber.toString()
               : serverNumber.toString()
           }/bot1457488865:AAG4vqcb0EXNABBqHzN47mg5GEMaJqub-vQ/sendVideo`;
-          let command = `node upload ./output${videoPath} ${chatId} ${videoHeight} ${videoWidth} ${caption} ${url}`;
+          let command = `node upload output${videoPath} ${chatId} ${videoHeight} ${videoWidth} "${caption}" "${url}"`;
+          console.log(command);
           await new Promise((resolve, reject) => {
             os.exec(command, function (e) {
               resolve();
