@@ -83,25 +83,26 @@ app.get("/file", async function (req, res, next) {
       os.exec(
         `ffmpeg -i ${videoPath} -i ${audioPath} -c copy output${videoPath}`,
         async function () {
-          os.exec(`rm -rf ${name}*`);
-          if (serverNumber == 40) {
+          os.exec(`sudo rm -rf ${name}*`, function () {});
+          if (serverNumber == 20) {
             serverNumber = 0;
           }
           ++serverNumber;
-          let r = `curl --location --request POST 'http://localhost:90${
+          let videoHeight = chosen.video[2];
+          let videoWidth = chosen.video[3];
+          let caption = `This is just a test (${n.toString()})!`;
+          let url = `http://localhost:90${
             serverNumber.toString().length == 1
               ? "0" + serverNumber.toString()
               : serverNumber.toString()
-          }/bot1457488865:AAG4vqcb0EXNABBqHzN47mg5GEMaJqub-vQ/sendVideo' --form 'video=@"./output${videoPath}"' --form 'chat_id="${chatId}"' --form 'height="${
-            chosen.video[2]
-          }"' --form 'width="${
-            chosen.video[3]
-          }"' --form 'caption="This is just a test (${n.toString()})!"' && rm -rf *${name}*`;
+          }/bot1457488865:AAG4vqcb0EXNABBqHzN47mg5GEMaJqub-vQ/sendVideo`;
+          let command = `node upload ./output${videoPath} ${chatId} ${videoHeight} ${videoWidth} ${caption} ${url}`;
           await new Promise((resolve, reject) => {
-            os.exec(r, function (e) {
+            os.exec(command, function (e) {
               resolve();
             });
           });
+          os.exec(`sudo rm -rf *${name}*`, function () {});
           --requests;
           try {
             events[0].emit("ready");
@@ -116,7 +117,7 @@ app.get("/file", async function (req, res, next) {
   }
   res.send("<h1>Video Downlaod!</h1>");
 });
-https: app.use(function (req, res, next) {
+app.use(function (req, res, next) {
   res.send("<h1>Hello World!</h1>");
 });
 
