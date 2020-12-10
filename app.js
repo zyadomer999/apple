@@ -1,15 +1,12 @@
 const express = require("express");
 const ytdl = require("ytdl-core");
-const FormData = require("form-data");
 const fs = require("fs");
-const got = require("got");
 const os = require("child_process");
-const getStream = require("get-stream");
+const EventEmitter = require("events");
 
 let serverNumber = 0;
 let number = -1;
 const app = express();
-const EventEmitter = require("events");
 
 class MyEmitter extends EventEmitter {}
 
@@ -64,7 +61,6 @@ app.get("/file", async function (req, res, next) {
       getVideoLinks(videoId, resolve);
     }).then(async (chosen) => {
       const n = ++number;
-      const form = new FormData();
       const name = randomName();
       const videoPath = name + ".mp4";
       const audioPath = name + ".mp3";
@@ -88,18 +84,17 @@ app.get("/file", async function (req, res, next) {
             serverNumber = 0;
           }
           ++serverNumber;
-          let videoHeight = chosen.video[2];
-          let videoWidth = chosen.video[3];
-          let caption = `This is just a test (${n.toString()})!`;
-          let url = `http://localhost:90${
+          let r = `curl --location --request POST 'http://localhost:90${
             serverNumber.toString().length == 1
               ? "0" + serverNumber.toString()
               : serverNumber.toString()
-          }/bot1457488865:AAG4vqcb0EXNABBqHzN47mg5GEMaJqub-vQ/sendVideo`;
-          let command = `node upload output${videoPath} ${chatId} ${videoHeight} ${videoWidth} "${caption}" "${url}"`;
-          console.log(command);
+          }/bot1457488865:AAG4vqcb0EXNABBqHzN47mg5GEMaJqub-vQ/sendVideo' --form 'video=@"./output${videoPath}"' --form 'chat_id="${chatId}"' --form 'height="${
+            chosen.video[2]
+          }"' --form 'width="${
+            chosen.video[3]
+          }"' --form 'caption="This is just a test (${n.toString()})!"'`;
           await new Promise((resolve, reject) => {
-            os.exec(command, function (e) {
+            os.exec(r, function (e) {
               resolve();
             });
           });
@@ -118,7 +113,7 @@ app.get("/file", async function (req, res, next) {
   }
   res.send("<h1>Video Downlaod!</h1>");
 });
-app.use(function (req, res, next) {
+https: app.use(function (req, res, next) {
   res.send("<h1>Hello World!</h1>");
 });
 
